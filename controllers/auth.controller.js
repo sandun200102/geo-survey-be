@@ -22,11 +22,13 @@ export const googleLogin = async (req, res) => {
     const payload = ticket.getPayload();
 
     let user = await User.findOne({ email: payload.email });
+    const splitName = payload.name.split(' '); // Split full name into first and last
 
     if (!user) {
       user = new User({
         googleId: payload.sub,
-        name: payload.name,
+        firstName: splitName[0],
+        lastName: splitName[1],
         email: payload.email,
         password: crypto.randomBytes(16).toString('hex'), // Generate a random password
         isAdmin: false,
@@ -34,8 +36,8 @@ export const googleLogin = async (req, res) => {
         role: 'user',
       });
       await user.save();
-      await sendWelcomeEmailGoogle(user.email, user.name);
-
+      await sendWelcomeEmailGoogle(user.email, user.firstName);
+      
     }
 
     res.json({ message: 'User authenticated', user });
@@ -46,10 +48,10 @@ export const googleLogin = async (req, res) => {
 };
 
 export const signup = async (req, res) => {
-    const { email, password, name } = req.body;
+    const { email, password, firstName, lastName, contactNumber, address } = req.body;
     try {
         // Validate the request body
-        if (!email || !password || !name) {
+        if (!email || !password || !firstName || !lastName || !contactNumber || !address) {
             return res.status(400).json({ message: 'All fields are required' });
         }
         // Check if the user already exists
@@ -65,7 +67,10 @@ export const signup = async (req, res) => {
         const user = new User({ 
             email, 
             password : hashedPassword, 
-            name ,
+            firstName,
+            lastName,
+            contactNumber,
+            address,
             role : 'user',
             isAdmin: false,
             verificationToken ,
@@ -263,7 +268,6 @@ export const resetPassword = async (req, res) => {
     }
 }
 
-
 export const checkAuth = async (req, res) => {
 	try {
 		const user = await User.findById(req.userId).select("-password");
@@ -277,3 +281,65 @@ export const checkAuth = async (req, res) => {
 		res.status(400).json({ success: false, message: error.message });
 	}
 }
+
+export const updateUser = async (req, res) => {
+  const { firstName,
+        lastName,
+        email: primaryEmail,
+        secondaryEmail,
+        contactNumber,
+        secondaryContactNumber,
+        address,
+        bio } = req.body;
+  const userId = req.params.id;
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { firstName,
+        lastName,
+        email: primaryEmail,
+        secondaryEmail,
+        contactNumber,
+        secondaryContactNumber,
+        address,
+        bio },
+      { new: true }
+    );
+
+    if (!updatedUser) return res.status(404).json({ message: 'User not found' });
+
+    res.status(200).json({ updatedUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error updating user' });
+  }
+};
+
+// Remove user
+export const removeUser = async (req, res) => {
+  try {
+    const remove = await User.findByIdAndDelete(req.params.id);
+    if (!remove) return res.status(404).json({ message: "User not found" });
+    res.status(200).json({ message: "User removed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to remove user" });
+  }
+};
+
+export const getUsers = async (req, res) => {
+  try {
+    const { email } = req.query;
+    let query = {};
+
+    if (email) {
+      query.email = { $regex: new RegExp(email, "i") }; // case-insensitive match
+    }
+
+    const users = await User.find(query).select("-password");
+    res.json({ users });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch users" });
+  }
+};

@@ -1,19 +1,45 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    name: {
+    firstName: {
         type: String,
         required: true,
+    },
+    lastName: {
+        type: String,
+        required: true,
+        unique: true,
     },
     email: {
         type: String,
         required: true,
         unique: true,
     },
+    secondaryEmail: {
+        type: String,
+        default: null,
+    },
     password: {
         type: String,
         unique: true,
-    },//google sign in
+    },
+    contactNumber: {
+        type: String,
+        default: null,
+    },
+    secondaryContactNumber: {
+        type: String,
+        default: null,
+    },
+    address: {
+        type: String,
+        default: null,
+    },
+    bio: {
+        type: String,
+        default: null,
+    },
+    //google sign in
     googleId: {
         type: String,
         unique: true,
@@ -44,6 +70,19 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    equipment: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'equipment_data',
+    }],
+    totalEquipment: {
+        type: Number,
+        default: 0,
+    },
+    totalAmount: {
+        type: Number,
+        default: 0,
+    },
+
     resetPasswordToken: String,
     resetPasswordExpiresAt: Date,
     verificationToken: String,
@@ -53,4 +92,4 @@ const userSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-export const User = mongoose.model('User',userSchema);
+export const User = mongoose.model('User_Data',userSchema);
