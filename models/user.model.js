@@ -82,6 +82,14 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    status:{
+        type: String,
+        default: "active"
+    },
+    hasEquipmentBooked: {
+        type: Boolean,
+        default: false,
+    },
 
     resetPasswordToken: String,
     resetPasswordExpiresAt: Date,

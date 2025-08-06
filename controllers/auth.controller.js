@@ -316,16 +316,6 @@ export const updateUser = async (req, res) => {
   }
 };
 
-// Remove user
-export const removeUser = async (req, res) => {
-  try {
-    const remove = await User.findByIdAndDelete(req.params.id);
-    if (!remove) return res.status(404).json({ message: "User not found" });
-    res.status(200).json({ message: "User removed successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to remove user" });
-  }
-};
 
 export const getUsers = async (req, res) => {
   try {
@@ -341,5 +331,79 @@ export const getUsers = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to fetch users" });
+  }
+};
+
+
+export const updateUserStatus = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { status } = req.body;
+
+		if (!['active', 'inactive'].includes(status)) {
+			return res.status(400).json({ success: false, message: "Invalid status. Must be 'active' or 'inactive'" });
+		}
+
+		// Prevent admin from deactivating themselves
+		if (id === req.userId && status === 'inactive') {
+			return res.status(400).json({ success: false, message: "Cannot deactivate your own account" });
+		}
+
+		const updatedUser = await User.findByIdAndUpdate(
+			id,
+			{ status },
+			{ new: true, runValidators: true }
+		).select("-password");
+
+		if (!updatedUser) {
+			return res.status(404).json({ success: false, message: "User not found" });
+		}
+
+		res.status(200).json({
+			success: true,
+			message: `User status updated to ${status}`,
+			user: updatedUser,
+		});
+	} catch (error) {
+		console.error("Error in updateUserStatus: ", error);
+		res.status(500).json({ success: false, message: "Failed to update user status" });
+	}
+};
+
+
+export const removeUser = async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		// Prevent admin from deleting themselves
+		if (id === req.userId) {
+			return res.status(400).json({ success: false, message: "Cannot delete your own account" });
+		}
+
+		const deletedUser = await User.findByIdAndDelete(id);
+
+		if (!deletedUser) {
+			return res.status(404).json({ success: false, message: "User not found" });
+		}
+
+		res.status(200).json({
+			success: true,
+			message: "User removed successfully",
+			deletedUser: { ...deletedUser._doc, password: undefined },
+		});
+	} catch (error) {
+		console.error("Error in removeUser: ", error);
+		res.status(500).json({ success: false, message: "Failed to remove user" });
+	}
+};
+
+
+export const searchUsers = async (req, res) => {
+  try {
+    const user = await Equipment.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "user not found" });
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving user" });
   }
 };
