@@ -45,7 +45,16 @@ const equipmentSchema = new mongoose.Schema({
 
   value: {
     type: Number
-  } 
+  },
+  //images array
+   imageKey:{
+    type: String,
+    default: null,
+   },
+   bucketName:{
+    type: String,
+    default: null
+   },
 
 }, {
   timestamps: true

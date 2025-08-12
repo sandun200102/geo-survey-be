@@ -280,7 +280,7 @@ export const checkAuth = async (req, res) => {
 		console.log("Error in checkAuth ", error);
 		res.status(400).json({ success: false, message: error.message });
 	}
-}
+};
 
 export const updateUser = async (req, res) => {
   const { firstName,
@@ -407,3 +407,83 @@ export const searchUsers = async (req, res) => {
     res.status(500).json({ message: "Error retrieving user" });
   }
 };
+
+
+export const sendContactEmail = async (req, res) => {
+    const { 
+          name, 
+          email, 
+          phone, 
+          company, 
+          projectType, 
+          message
+           } = req.body;
+    try {
+        // Check if the user exists
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
+        }
+
+        // Generate a reset password token
+        const resetToken = crypto.randomBytes(20).toString('hex');
+        
+
+        // Send the reset password email
+        // await sendPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
+        await sendPasswordResetEmailGoogle(user.email, user.name, resetToken, process.env.CLIENT_URL);
+
+        res.status(200).json({ 
+            success: true,
+            message: 'Contact email  sent successfully. Please check your inbox.', 
+        });
+
+    } catch (error) {
+        console.error('Error sending Contact email:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Internal server error' 
+        });
+    }
+
+};
+
+
+export const sendBookingEmail = async (req, res) => {
+    const { 
+          name, 
+          email ,
+          phone, 
+          startDate, 
+          endDate, 
+          notes
+           } = req.body;
+    try {
+        // Check if the user exists
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
+        }
+
+        // Generate a reset password token
+        const resetToken = crypto.randomBytes(20).toString('hex');
+        
+
+        // Send the reset password email
+        // await sendPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
+        await sendPasswordResetEmailGoogle(user.email, user.name, resetToken, process.env.CLIENT_URL);
+
+        res.status(200).json({ 
+            success: true,
+            message: 'Booking request email  sent successfully. Please check your inbox.', 
+        });
+
+    } catch (error) {
+        console.error('Error sending bookong request email:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Internal server error' 
+        });
+    }
+
+}

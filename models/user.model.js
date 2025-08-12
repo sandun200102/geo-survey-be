@@ -90,6 +90,11 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    imageKey:{
+    type: String,
+    default: null,
+   },
+   
 
     resetPasswordToken: String,
     resetPasswordExpiresAt: Date,

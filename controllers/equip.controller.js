@@ -106,3 +106,28 @@ export const deleteEquipment = async (req, res) => {
     res.status(500).json({ message: "Failed to delete equipment" });
   }
 };
+
+
+// Update equipment
+export const updateImageKey = async (req, res) => {
+  const {imageKey,
+          bucketName
+    } = req.body;
+  const equipId = req.params.id;
+
+  try {
+    const updatedImageKey = await Equipment.findByIdAndUpdate(
+      equipId,
+      { imageKey,
+        bucketName},
+      { new: true }
+    );
+
+    if (!updatedImageKey) return res.status(404).json({ message: 'Equipment not found' });
+
+    res.status(200).json({ updatedImageKey });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error updating Equipment image key' });
+  }
+};

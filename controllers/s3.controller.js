@@ -1,190 +1,70 @@
-import AWS from 'aws-sdk';
-import multer  from 'multer';
-import multerS3 from 'multer-s3';
-import path  from 'path';
+import aws from "aws-sdk";
+import { v4 as uuid } from "uuid";
+import dotenv from "dotenv";
+import multer from "multer";
+const { S3 } = aws;
+dotenv.config();
 
-// Configure AWS
-AWS.config.update({
+const s3 = new S3({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   region: process.env.AWS_REGION,
 });
 
-const s3 = new AWS.S3();
+const s3Uploadv2 = async (files) => {
+  const params = files.map((file) => ({
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: `uploads/${uuid()}-${file.originalname}`,
+    Body: file.buffer,
+  }));
 
-// Configure multer for S3 upload
-export const upload = multer({
-  storage: multerS3({
-    s3: s3,
-    bucket: process.env.AWS_BUCKET_NAME,
-    acl: 'public-read', // Make files publicly readable
-    metadata: function (req, file, cb) {
-      cb(null, { fieldName: file.fieldname });
-    },
-    key: function (req, file, cb) {
-      // Create unique filename with timestamp
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      const fileExtension = path.extname(file.originalname);
-      const fileName = `images/${uniqueSuffix}${fileExtension}`;
-      cb(null, fileName);
-    }
-  }),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-  },
-  fileFilter: function (req, file, cb) {
-    // Check file type
-    const allowedTypes = /jpeg|jpg|png|gif|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
+  return await Promise.all(params.map((param) => s3.upload(param).promise()));
+};
 
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed!'));
-    }
+const storage = multer.memoryStorage();
+
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = ["image/png", "image/jpg", "image/jpeg"];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("File type not allowed"), false);
   }
-});
+};
 
-// Controller functions
-export const uploadImage = async (req, res) => {
+export const upload = multer({ storage, fileFilter, limits: { fileSize: 1024 * 1024 * 5, files: 2 } });
+
+export const uploadFiles = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: 'No file uploaded'
-      });
-    }
-
-    const imageUrl = req.file.location;
-    const imageKey = req.file.key;
-
-    // You can save image info to database here if needed
-    // const savedImage = await Image.create({
-    //   url: imageUrl,
-    //   key: imageKey,
-    //   userId: req.user.id
-    // });
-
-    res.status(200).json({
-      success: true,
-      message: 'Image uploaded successfully',
-      data: {
-        url: imageUrl,
-        key: imageKey
-      }
+    const results = await s3Uploadv2(req.files);
+    console.log(results);
+    return res.json({
+      status: "success",
+      results,
     });
-  } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to upload image',
-      error: error.message
+  } catch (err) {
+    console.error("Error uploading files:", err);
+    return res.status(500).json({
+      status: "error",
+      message: "File upload failed",
+      error: err.message,
     });
   }
 };
 
-export const deleteImage = async (req, res) => {
-  try {
-    const { key } = req.params;
+export const getImage =  (req, res) => {
+  const key = req.params.key;
+  const Bucket = process.env.AWS_BUCKET_NAME;
+  const region = process.env.AWS_REGION;
 
-    if (!key) {
-      return res.status(400).json({
-        success: false,
-        message: 'Image key is required'
-      });
+  const imageUrl = `https://${Bucket}.s3.${region}.amazonaws.com/${key}`;
+
+  s3.headObject({ Bucket, Key: key }, (err) => {
+    if (err && err.code === "NotFound") {
+      return res.status(404).json({ message: "Image not found" });
+    } else if (err) {
+      return res.status(500).json({ message: "Error checking image", error: err.message });
     }
-
-    const params = {
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Key: key
-    };
-
-    await s3.deleteObject(params).promise();
-
-    // Delete from database if you're storing image info
-    // await Image.findOneAndDelete({ key: key, userId: req.user.id });
-
-    res.status(200).json({
-      success: true,
-      message: 'Image deleted successfully'
-    });
-  } catch (error) {
-    console.error('Delete error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete image',
-      error: error.message
-    });
-  }
+    return res.json({ url: imageUrl });
+  });
 };
-
-export const getSignedUrl = async (req, res) => {
-  try {
-    const { key } = req.params;
-
-    if (!key) {
-      return res.status(400).json({
-        success: false,
-        message: 'Image key is required'
-      });
-    }
-
-    const params = {
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Key: key,
-      Expires: 3600 // URL expires in 1 hour
-    };
-
-    const signedUrl = s3.getSignedUrl('getObject', params);
-
-    res.status(200).json({
-      success: true,
-      data: {
-        signedUrl: signedUrl
-      }
-    });
-  } catch (error) {
-    console.error('Signed URL error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to generate signed URL',
-      error: error.message
-    });
-  }
-};
-
-export const listImages = async (req, res) => {
-  try {
-    const params = {
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Prefix: 'images/', // Only get images from the images folder
-      MaxKeys: 100
-    };
-
-    const data = await s3.listObjectsV2(params).promise();
-    
-    const images = data.Contents.map(item => ({
-      key: item.Key,
-      lastModified: item.LastModified,
-      size: item.Size,
-      url: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${item.Key}`
-    }));
-
-    res.status(200).json({
-      success: true,
-      data: {
-        images: images,
-        count: images.length
-      }
-    });
-  } catch (error) {
-    console.error('List images error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to list images',
-      error: error.message
-    });
-  }
-};
-
