@@ -445,8 +445,42 @@ export const sendContactEmail = async (req, res) => {
             message: 'Internal server error' 
         });
     }
-
 };
+
+
+    export const updatePermission = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { permission } = req.body;
+
+		if (!['null','accept','pending'].includes(permission)) {
+			return res.status(400).json({ success: false, message: "Invalid status. Must be 'null' or 'accept' or 'pending'" });
+		}
+
+		
+
+		const updatedUser = await User.findByIdAndUpdate(
+			id,
+			{ permission },
+			{ new: true, runValidators: true }
+		).select("-password");
+
+		if (!updatedUser) {
+			return res.status(404).json({ success: false, message: "User not found" });
+		}
+
+		res.status(200).json({
+			success: true,
+			message: `User status updated to ${permission}`,
+			user: updatedUser,
+		});
+	} catch (error) {
+		console.error("Error in updateUserStatus: ", error);
+		res.status(500).json({ success: false, message: "Failed to update user status" });
+	}
+};
+
+
 
 
 export const sendBookingEmail = async (req, res) => {

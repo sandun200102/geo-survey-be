@@ -94,6 +94,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
    },
+   permission: {
+    type: String,
+    default: 'null',
+    },
    
 
     resetPasswordToken: String,

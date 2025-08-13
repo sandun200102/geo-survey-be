@@ -1,6 +1,6 @@
 import express from 'express';
 import { Router } from 'express';
-import { signup , login, logout, verifyEmail, forgotPassword, resetPassword, checkAuth, googleLogin, updateUser, getUsers, removeUser, searchUsers, updateUserStatus, sendContactEmail, sendBookingEmail } from '../controllers/auth.controller.js';
+import { signup , login, logout, verifyEmail, forgotPassword, resetPassword, checkAuth, googleLogin, updateUser, getUsers, removeUser, searchUsers, updateUserStatus, sendContactEmail, sendBookingEmail, updatePermission } from '../controllers/auth.controller.js';
 import { verifyToken } from '../middleware/verifyToken.js';
 import { uploadNewEquipment, updateEquipment , getAllEquipment, getEquipmentById, deleteEquipment, updateImageKey  } from '../controllers/equip.controller.js';
 import {  isAdmin } from '../middleware/verifyAdmin.js';
@@ -25,6 +25,8 @@ router.patch("/update-user-status/:id", updateUserStatus);
 router.delete("/remove-user/:id", removeUser);
 router.post("/contact-email",sendContactEmail);
 router.post("/booking-email",sendBookingEmail);
+router.patch("/update-permission/:id", updatePermission);
+
 
 
 
