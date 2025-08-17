@@ -2,14 +2,19 @@ import crypto from 'crypto';
 import { User } from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
-import { sendVerificationEmailGoogle } from '../mailtrap/sendVerificationCode.js';
+import { sendVerificationEmailGoogle } from '../mailtrap/sendVerificationCodeEmail.js';
 import { sendWelcomeEmailGoogle } from '../mailtrap/sendWelcomeEmail.js';
 import { sendPasswordResetEmailGoogle } from '../mailtrap/forgetPasswordEmail.js';
 import { resetPasswordSuccessEmailGoogle } from '../mailtrap/resetPasswordSuccess.js';
+import { sendContactEmailGoogle } from '../mailtrap/sendContactEmail.js';
+import { sendBookingEmailGoogle } from '../mailtrap/sendBookingEmail.js';
+import { sendPermissionEmailGoogle } from '../mailtrap/sendPermissionEmail.js';
+import { sendPermissionEmailGoogleToUser } from '../mailtrap/sendPermissionEmailToUSer.js';
+import { sendBookingConfirmedEmailGoogle } from '../mailtrap/sendBookingConfirmedEmail.js';
 import { OAuth2Client } from 'google-auth-library';
 
-
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 export const googleLogin = async (req, res) => {
   const { token } = req.body;
 
@@ -425,13 +430,17 @@ export const sendContactEmail = async (req, res) => {
             return res.status(400).json({ message: 'User not found' });
         }
 
-        // Generate a reset password token
-        const resetToken = crypto.randomBytes(20).toString('hex');
+    
         
 
         // Send the reset password email
         // await sendPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
-        await sendPasswordResetEmailGoogle(user.email, user.name, resetToken, process.env.CLIENT_URL);
+        await sendContactEmailGoogle(name, 
+          email, 
+          phone, 
+          company, 
+          projectType, 
+          message);
 
         res.status(200).json({ 
             success: true,
@@ -448,7 +457,7 @@ export const sendContactEmail = async (req, res) => {
 };
 
 
-    export const updatePermission = async (req, res) => {
+ export const updatePermission = async (req, res) => {
 	try {
 		const { id } = req.params;
 		const { permission } = req.body;
@@ -456,9 +465,7 @@ export const sendContactEmail = async (req, res) => {
 		if (!['null','accept','pending'].includes(permission)) {
 			return res.status(400).json({ success: false, message: "Invalid status. Must be 'null' or 'accept' or 'pending'" });
 		}
-
-		
-
+        
 		const updatedUser = await User.findByIdAndUpdate(
 			id,
 			{ permission },
@@ -481,8 +488,6 @@ export const sendContactEmail = async (req, res) => {
 };
 
 
-
-
 export const sendBookingEmail = async (req, res) => {
     const { 
           name, 
@@ -490,7 +495,10 @@ export const sendBookingEmail = async (req, res) => {
           phone, 
           startDate, 
           endDate, 
-          notes
+          notes,
+          equipmentId,
+          equipmentName
+
            } = req.body;
     try {
         // Check if the user exists
@@ -499,13 +507,7 @@ export const sendBookingEmail = async (req, res) => {
             return res.status(400).json({ message: 'User not found' });
         }
 
-        // Generate a reset password token
-        const resetToken = crypto.randomBytes(20).toString('hex');
-        
-
-        // Send the reset password email
-        // await sendPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
-        await sendPasswordResetEmailGoogle(user.email, user.name, resetToken, process.env.CLIENT_URL);
+        await sendBookingEmailGoogle(name, email ,phone, startDate, endDate, notes, equipmentId, equipmentName);
 
         res.status(200).json({ 
             success: true,
@@ -520,4 +522,100 @@ export const sendBookingEmail = async (req, res) => {
         });
     }
 
-}
+};
+
+
+export const sendPermissionEmail = async (req, res) => {
+    const { 
+          name, 
+          email,
+          projectId,
+          projectName
+           } = req.body;
+    try {
+        // Check if the user exists
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
+        }
+
+        await sendPermissionEmailGoogle(name, email, projectId, projectName);
+
+        res.status(200).json({ 
+            success: true,
+            message: 'Permission request email  sent successfully. Please check your inbox.', 
+        });
+
+    } catch (error) {
+        console.error('Error sending permission request email:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Internal server error' 
+        });
+    }
+
+};
+
+
+export const sendPermissionEmailToUser = async (req, res) => {
+    const { 
+          name, 
+          email,
+          token,
+          projectName
+           } = req.body;
+    try {
+        // Check if the user exists
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
+        }
+
+        await sendPermissionEmailGoogleToUser(name, email, token, projectName);
+
+        res.status(200).json({ 
+            success: true,
+            message: 'Permission request email  sent successfully. Please check your inbox.', 
+        });
+
+    } catch (error) {
+        console.error('Error sending permission request email:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Internal server error' 
+        });
+    }
+
+};
+
+export const sendBookingConfirmedEmail = async (req, res) => {
+    const { 
+           name, 
+           email, 
+           equipmentName, 
+           startDate,
+           endDate
+           } = req.body;
+    try {
+        // Check if the user exists
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
+        }
+
+        await sendBookingConfirmedEmailGoogle(name, email, equipmentName, startDate,endDate);
+
+        res.status(200).json({ 
+            success: true,
+            message: 'Booking confirmed email  sent successfully. Please check your inbox.', 
+        });
+
+    } catch (error) {
+        console.error('Error sending Booking confirmed email:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Internal server error' 
+        });
+    }
+
+};

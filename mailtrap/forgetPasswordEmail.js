@@ -1,5 +1,5 @@
 export const sendPasswordResetEmailGoogle = (email, username ,token, client_URL) => {
-    const scriptURL = "https://script.google.com/macros/s/AKfycbyMe58FmnhWc4vuIvT7CQu6IMfXbWetGeTrj-UKiNTh6n35nHiJw6mExTMy45OQSWbH/exec"; // Replace with your actual script URL
+    const scriptURL = "https://script.google.com/macros/s/AKfycbytzTkXq1dXdo2OzlX6010hK21p7bYm4WaoQoZ23Mb3fEp_nMz9hXuwZXGb6VCC2L9d/exec"; // Replace with your actual script URL
 
     fetch(scriptURL, {
         method: "POST",

@@ -1,5 +1,5 @@
 export const sendWelcomeEmailGoogle = (email, username) => {
-    const scriptURL = "https://script.google.com/macros/s/AKfycbw0GHGajztzaghnXYL7EWIIgKf_28f0eMve66moDPxdYlpMlgQRuBahhsrzjHwh6IyE/exec"; // Replace with your actual script URL
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzi5YvZsHSU9c2ajGRKUdBWvfnagZq1xcRg7kvFv43wG9kHzWnVY6XtlPJebTyWErLA/exec" // Replace with your actual script URL
 
     fetch(scriptURL, {
         method: "POST",
