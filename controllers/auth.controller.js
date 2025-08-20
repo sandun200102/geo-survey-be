@@ -114,9 +114,9 @@ export const verifyEmail = async (req, res) => {
         if (!user) {
             return res.status(400).json({ message: 'Invalid verification code' });
         }
-        // if (user.verificationTokenExpiresAt < Date.now()) {
-        //     return res.status(400).json({ message: 'Verification code has expired' });
-        // }
+        if (user.verificationTokenExpiresAt < Date.now()) {
+            return res.status(400).json({ message: 'Verification code has expired' });
+        }
         user.isVerified = true;
         user.verificationToken = undefined;
         user.verificationTokenExpiresAt = undefined;
@@ -618,4 +618,35 @@ export const sendBookingConfirmedEmail = async (req, res) => {
         });
     }
 
+};
+
+export const updateUserBookingStatus= async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { hasEquipmentBooked } = req.body;
+
+	if (typeof hasEquipmentBooked !== "boolean") {
+    return res.status(400).json({ success: false, message: "Status must be a boolean value" });
+    }
+
+
+		const updatedUser = await User.findByIdAndUpdate(
+			id,
+			{ hasEquipmentBooked },
+			{ new: true, runValidators: true }
+		).select("-password");
+
+		if (!updatedUser) {
+			return res.status(404).json({ success: false, message: "User not found" });
+		}
+
+		res.status(200).json({
+			success: true,
+			message: `User booking status updated to ${hasEquipmentBooked}`,
+			user: updatedUser,
+		});
+	} catch (error) {
+		console.error("Error in update User booking Status: ", error);
+		res.status(500).json({ success: false, message: "Failed to update user booking status" });
+	}
 };

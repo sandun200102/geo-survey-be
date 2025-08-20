@@ -1,11 +1,14 @@
 import express from 'express';
 import { Router } from 'express';
-import { signup , login, logout, verifyEmail, forgotPassword, resetPassword, checkAuth, googleLogin, updateUser, getUsers, removeUser, searchUsers, updateUserStatus, sendContactEmail, sendBookingEmail, updatePermission, sendPermissionEmail, sendPermissionEmailToUser, sendBookingConfirmedEmail } from '../controllers/auth.controller.js';
+import { signup , login, logout, verifyEmail, forgotPassword, resetPassword, checkAuth, googleLogin, updateUser, getUsers, removeUser, searchUsers, updateUserStatus, sendContactEmail, sendBookingEmail, updatePermission, sendPermissionEmail, sendPermissionEmailToUser, sendBookingConfirmedEmail, updateUserBookingStatus } from '../controllers/auth.controller.js';
 import { verifyToken } from '../middleware/verifyToken.js';
 import { uploadNewEquipment, updateEquipment , getAllEquipment, getEquipmentById, deleteEquipment, updateImageKey  } from '../controllers/equip.controller.js';
 import { createBooking, getAllBookings, updateBookingStatus, getBookingById, getBookingsByUserId} from "../controllers/booking.controller.js";
 import {  isAdmin } from '../middleware/verifyAdmin.js';
 import { upload, uploadFiles, getImage } from "../controllers/s3.controller.js";
+import { UploadImageWebsite } from "../controllers/image.controller.js";
+
+
 const router = Router();
 
 router.get("/check-auth",verifyToken,checkAuth);
@@ -48,7 +51,11 @@ router.post('/create-booking', createBooking);
 router.get('/get-all-bookings', getAllBookings);
 router.get('/get-booking-id', getBookingById);
 router.get('/get-booking-userid', getBookingsByUserId);
-router.put('/update-booking-staus/:id', updateBookingStatus);
+router.put('/update-booking-status/:id', updateBookingStatus);
+router.patch('/update-user-booking-status/:id', updateUserBookingStatus);
+
+
+router.post('/upload-images-website', UploadImageWebsite);
 
 
 

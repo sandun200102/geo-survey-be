@@ -68,3 +68,6 @@ export const getImage =  (req, res) => {
     return res.json({ url: imageUrl });
   });
 };
+
+
+
