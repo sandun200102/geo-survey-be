@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
+const lmsUserSchema = new mongoose.Schema({
     firstName: {
         type: String,
         required: true,
@@ -14,26 +14,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    secondaryEmail: {
-        type: String,
-        default: null,
-    },
     password: {
-        type: String
+        type: String,
     },
     contactNumber: {
-        type: String,
-        default: null,
-    },
-    secondaryContactNumber: {
-        type: String,
-        default: null,
-    },
-    address: {
-        type: String,
-        default: null,
-    },
-    bio: {
         type: String,
         default: null,
     },
@@ -43,14 +27,10 @@ const userSchema = new mongoose.Schema({
         unique: true,
         default: null,
     },
-    isAdmin: {
-        type: Boolean,
-        default: false,
-    },
     role: {
         type: String,
-        enum: ['user', 'admin'],
-        default: 'user',
+        enum: ['student', 'lecture'],
+        default: 'student',
     },
     lastLogin: {
         type: Date,
@@ -68,18 +48,6 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    equipment: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'equipment_data',
-    }],
-    totalEquipment: {
-        type: Number,
-        default: 0,
-    },
-    totalAmount: {
-        type: Number,
-        default: 0,
-    },
     status:{
         type: String,
         default: "active"
@@ -92,12 +60,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
    },
-   permission: {
-    type: String,
-    default: 'null',
-    },
-   
-
     resetPasswordToken: String,
     resetPasswordExpiresAt: Date,
     verificationToken: String,
@@ -107,4 +69,4 @@ const userSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-export const User = mongoose.model('User_Data',userSchema);
+export const LmsUser = mongoose.model('lms_user_Data',lmsUserSchema);
