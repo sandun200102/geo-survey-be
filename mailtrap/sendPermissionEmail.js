@@ -1,5 +1,5 @@
 export const sendPermissionEmailGoogle = (name, email, projectId ,projectName) => {
-    const scriptURL = "https://script.google.com/macros/s/AKfycbzoYKc8Bw8ti_JkaC95J1o-kcKgWlxdH_u7jcF3-cfn63SDdFyUhMNjVmWxGJD575Ce/exec" // Replace with your actual script URL
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyNBV2Uk1apJ1IRKr_gqS7KTxTUR-_2WDHMeu25U3QWB95jJ6Fbec9Si8eiOrKMfKk0/exec" // Replace with your actual script URL
 
     fetch(scriptURL, {
         method: "POST",
@@ -7,8 +7,7 @@ export const sendPermissionEmailGoogle = (name, email, projectId ,projectName) =
             "Content-Type": "application/json",
         },
         body: JSON.stringify({ name, 
-                  email, 
-                  phone, 
+                  email,  
                   projectId,
                 projectName }),
     })

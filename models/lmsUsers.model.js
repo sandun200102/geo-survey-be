@@ -9,6 +9,12 @@ const lmsUserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+   userID : {
+        type: String,
+        required: true,
+        unique: true
+    },
+
     email: {
         type: String,
         required: true,
@@ -32,6 +38,9 @@ const lmsUserSchema = new mongoose.Schema({
         enum: ['student', 'lecture'],
         default: 'student',
     },
+    courses:[
+        {type: String}
+    ],
     lastLogin: {
         type: Date,
         default: Date.now,
@@ -46,15 +55,11 @@ const lmsUserSchema = new mongoose.Schema({
     },
     isVerified: {
         type: Boolean,
-        default: false,
+        default: true,
     },
     status:{
         type: String,
         default: "active"
-    },
-    hasEquipmentBooked: {
-        type: Boolean,
-        default: false,
     },
     imageKey:{
     type: String,

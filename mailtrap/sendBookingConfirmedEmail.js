@@ -1,5 +1,5 @@
 export const sendBookingConfirmedEmailGoogle = (name, email, equipmentName ,startDate, endDate) => {
-    const scriptURL = "https://script.google.com/macros/s/AKfycbxXa8CAEsMR3wCLsKSnZ_dp_a-yO2iST-qc65a357BQIEmADmQ7r0P_tvO9hMwqWH5DGA/exec" // Replace with your actual script URL
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzNldjWt_Rzg0dJTj9hMDx27XDaBcCSBPSXTapPAH-DaJg9eN-DSCwuhOn6sxW7dIeRCw/exec" // Replace with your actual script URL
 
     fetch(scriptURL, {
         method: "POST",

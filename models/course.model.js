@@ -9,6 +9,20 @@ const courseSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    CourseDiscription: {
+        type: String,
+    },
+    credit: {
+        type: String,
+        required: true
+    },
+    inCharge:{
+        type: String
+    },
+    status: {
+        type: String
+    },
+    
     createdAt: {
         type: Date,
         default: Date.now,

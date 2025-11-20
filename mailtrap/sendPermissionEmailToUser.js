@@ -1,4 +1,4 @@
-export const sendPermissionEmailGoogleToUser = (name, email, token ,projectName) => {
+export const sendPermissionEmailGoogleToUser = (name, email,projectName) => {
     const scriptURL = "https://script.google.com/macros/s/AKfycbwInciBoRYAuMFRLhUAm8LVv0K1FxstxcjPAPyqn-N2_l64Kr83G8D-EClmuq7ioCLCbQ/exec" // Replace with your actual script URL
 
     fetch(scriptURL, {
@@ -8,8 +8,6 @@ export const sendPermissionEmailGoogleToUser = (name, email, token ,projectName)
         },
         body: JSON.stringify({ name, 
                   email, 
-                  phone, 
-                  token,
                 projectName }),
     })
         .then((res) => res.text())
