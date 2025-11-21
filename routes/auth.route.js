@@ -1,6 +1,6 @@
 import express from 'express';
 import { Router } from 'express';
-import { signup , login, logout, verifyEmail, forgotPassword, resetPassword, checkAuth, googleLogin, updateUser, getUsers, removeUser, searchUsers, updateUserStatus, sendContactEmail } from '../controllers/auth.controller.js';
+import { signup , login, logout, verifyEmail, forgotPassword, resetPassword, checkAuth, googleLogin, updateUser, getUsers, removeUser, searchUsers, updateUserStatus, sendContactEmail, updateRole } from '../controllers/auth.controller.js';
 import { verifyToken } from '../middleware/verifyToken.js';
 import { uploadNewEquipment, updateEquipment , getAllEquipment, getEquipmentById, deleteEquipment, updateImageKey  } from '../controllers/equip.controller.js';
 import { createBooking, getAllBookings, updateBookingStatus, getBookingById, getBookingsByUserId, sendBookingEmail, updatePermission, sendPermissionEmail, sendPermissionEmailToUser, sendBookingConfirmedEmail, updateUserBookingStatus} from "../controllers/booking.controller.js";
@@ -34,6 +34,7 @@ router.post("/permission-email",sendPermissionEmail);
 router.post("/permission-email-to-user",sendPermissionEmailToUser);
 router.post("/booking-confirmed-email",sendBookingConfirmedEmail);
 router.patch("/update-permission/:id", updatePermission);
+router.patch("/update-role/:id", updateRole);
 
 
 router.post("/upload", upload.array("file"), uploadFiles);
