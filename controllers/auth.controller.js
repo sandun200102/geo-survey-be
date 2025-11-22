@@ -457,129 +457,42 @@ export const sendContactEmail = async (req, res) => {
 };
 
 
-// export const updateRole = async (req, res) => {
-// 	try {
-// 		const { id } = req.params;
-// 		const { role } = req.body;
-
-// 		if (!['admin'].includes(role)) {
-// 			return res.status(400).json({ success: false, message: "Invalid status. Must be 'admin'" });
-// 		}
-
-// 		// Prevent admin from deactivating themselves
-// 		if (id === req.userId && role === 'admin') {
-// 			return res.status(400).json({ success: false, message: "Cannot make admin" });
-// 		}
-
-// 		const updatedUser = await User.findByIdAndUpdate(
-// 			id,
-// 			{ role },
-// 			{ new: true, runValidators: true }
-// 		).select("-password");
-
-// 		if (!updatedUser) {
-// 			return res.status(404).json({ success: false, message: "User not found" });
-// 		}
-
-// 		res.status(200).json({
-// 			success: true,
-// 			message: `User status updated to ${role}`,
-// 			user: updatedUser,
-// 		});
-// 	} catch (error) {
-// 		console.error("Error in updateUserStatus: ", error);
-// 		res.status(500).json({ success: false, message: "Failed to update user status" });
-// 	}
-// };
-
 export const updateRole = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { role } = req.body;
+	try {
+		const { id } = req.params;
+		const { role } = req.body;
 
-        const allowedRoles = ["user", "admin", "super-admin"];
-        if (!allowedRoles.includes(role)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid role. Allowed roles: user, admin, super-admin",
-            });
-        }
+		// if (!['admin'].includes(role)) {
+		// 	return res.status(400).json({ success: false, message: "Invalid status. Must be 'admin'" });
+		// }
 
-        const requestingUser = await User.findById(req.userId);
-        const targetUser = await User.findById(id);
+		// // Prevent admin from deactivating themselves
+		// if (id === req.userId && role === 'admin') {
+		// 	return res.status(400).json({ success: false, message: "Cannot make admin" });
+		// }
 
-        if (!targetUser) {
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
+		const updatedUser = await User.findByIdAndUpdate(
+			id,
+			{ role },
+			{ new: true, runValidators: true }
+		).select("-password");
 
-        // Role priority
-        const priority = {
-            "user": 1,
-            "admin": 2,
-            "super-admin": 3
-        };
+		if (!updatedUser) {
+			return res.status(404).json({ success: false, message: "User not found" });
+		}
 
-        // ==========================================
-        // 1. User Permission Check
-        // ==========================================
-        if (requestingUser.role === "user") {
-            return res.status(403).json({
-                success: false,
-                message: "Users cannot change roles",
-            });
-        }
-
-        // ==========================================
-        // 2. Admin cannot modify equal or higher roles
-        // ==========================================
-        if (requestingUser.role === "admin") {
-            // cannot touch admin or super-admin
-            if (priority[targetUser.role] >= priority["admin"]) {
-                return res.status(403).json({
-                    success: false,
-                    message: "Admins can only modify users",
-                });
-            }
-
-            // cannot assign super-admin
-            if (role === "super-admin") {
-                return res.status(403).json({
-                    success: false,
-                    message: "Admins cannot assign super-admin role",
-                });
-            }
-        }
-
-        // ==========================================
-        // 3. Super-admin cannot remove own super-admin role
-        // ==========================================
-        if (requestingUser.role === "super-admin" && id === req.userId && role !== "super-admin") {
-            return res.status(403).json({
-                success: false,
-                message: "Super admin cannot remove their own super-admin role",
-            });
-        }
-
-        // ==========================================
-        // 4. Apply update
-        // ==========================================
-        const updatedUser = await User.findByIdAndUpdate(
-            id,
-            { role },
-            { new: true, runValidators: true }
-        ).select("-password");
-
-        return res.status(200).json({
-            success: true,
-            message: `User role updated to ${role}`,
-            user: updatedUser,
-        });
-
-    } catch (error) {
-        console.error("Error updating role:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to update user role",
-        });
-    }
+		res.status(200).json({
+			success: true,
+			message: `User status updated to ${role}`,
+			user: updatedUser,
+		});
+	} catch (error) {
+		console.error("Error in updateUserStatus: ", error);
+		res.status(500).json({ success: false, message: "Failed to update user status" });
+	}
 };
+
+
+
+
+

@@ -18,7 +18,7 @@ const equipmentSchema = new mongoose.Schema({
 
   status: { 
     type: String, 
-    enum: ['available', 'booked', 'maintenance'], 
+    enum: ['available', 'booked', 'maintenance' ,"pending"], 
     default: 'available' ,
     required: true
   },

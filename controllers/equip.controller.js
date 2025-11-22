@@ -40,7 +40,6 @@ export const uploadNewEquipment = async (req, res) => {
     }
 }
 
-
 // Update equipment
 export const updateEquipment = async (req, res) => {
   const {name,

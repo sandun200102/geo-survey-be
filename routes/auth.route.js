@@ -2,7 +2,7 @@ import express from 'express';
 import { Router } from 'express';
 import { signup , login, logout, verifyEmail, forgotPassword, resetPassword, checkAuth, googleLogin, updateUser, getUsers, removeUser, searchUsers, updateUserStatus, sendContactEmail, updateRole } from '../controllers/auth.controller.js';
 import { verifyToken } from '../middleware/verifyToken.js';
-import { uploadNewEquipment, updateEquipment , getAllEquipment, getEquipmentById, deleteEquipment, updateImageKey  } from '../controllers/equip.controller.js';
+import { uploadNewEquipment, updateEquipment , getAllEquipment, getEquipmentById, deleteEquipment, updateImageKey } from '../controllers/equip.controller.js';
 import { createBooking, getAllBookings, updateBookingStatus, getBookingById, getBookingsByUserId, sendBookingEmail, updatePermission, sendPermissionEmail, sendPermissionEmailToUser, sendBookingConfirmedEmail, updateUserBookingStatus} from "../controllers/booking.controller.js";
 import {  isAdmin } from '../middleware/verifyAdmin.js';
 import { upload, uploadFiles, getImage } from "../controllers/s3.controller.js";
@@ -47,6 +47,7 @@ router.post('/upload-equipment', uploadNewEquipment);
 router.put('/update-equipment/:id', updateEquipment);
 router.put('/equipment-image-key/:id', updateImageKey);
 router.delete('/delete-equipment/:id', deleteEquipment);
+
 
 
 
