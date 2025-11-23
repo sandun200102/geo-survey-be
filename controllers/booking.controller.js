@@ -159,7 +159,7 @@ export const getBookingById = async (req, res) => {
 
 
 export const getBookingsByUserId = async (req, res) => {
-    const userId = req.params.userId;
+    const userId = req.params.id;
 
     try {
         const bookings = await Booking.find({ userId }).sort({ createdAt: -1 });
