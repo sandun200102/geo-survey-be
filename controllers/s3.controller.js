@@ -72,61 +72,6 @@ export const getImage =  (req, res) => {
 
 
 
-// // Large files Upload (Multiple Files) ---------------
-// export const uploadLargeFile = (req, res) => {
-//   try {
-//     const bb = busboy({ headers: req.headers });
-
-//     // KEY CHANGE: Initialize an array to hold all upload promises
-//     const uploadPromises = [];
-
-//     bb.on("file", (name, file, info) => {
-//       const { filename, mimeType } = info;
-      
-//       // OPTIONAL: You can log the start of each file upload
-//       console.log(`Starting upload for: ${filename}`); 
-
-//       const params = {
-//         Bucket: process.env.AWS_BUCKET_NAME,
-//         // Ensure keys are unique across all concurrent uploads
-//         Key: `uploads/projects/${Date.now()}-${filename}`, 
-//         Body: file, // <-- STREAM
-//         ContentType: mimeType,
-//       };
-
-//       // KEY CHANGE: Push each upload promise to the array
-//       const uploadPromise = s3.upload(params).promise();
-//       uploadPromises.push(uploadPromise);
-//     });
-
-//     bb.on("close", async () => {
-//       try {
-//         // KEY CHANGE: Wait for ALL promises in the array to resolve
-//         // 'results' will be an array containing the data for each successful S3 upload
-//         const results = await Promise.all(uploadPromises); 
-
-//         // Send back the array of results
-//         return res.json({ status: "success", result: results });
-//       } catch (err) {
-//         // If ANY promise fails, the catch block executes
-//         console.error('One or more S3 uploads failed:', err);
-//         return res.status(500).json({ 
-//           status: "error", 
-//           message: "One or more files failed to upload to S3.", 
-//           error: err.message 
-//         });
-//       }
-//     });
-
-//     // Pipe the request stream to Busboy to start parsing
-//     req.pipe(bb);
-//   } catch (error) {
-//     res.status(500).json({ error: "Upload failed", message: error.message });
-//   }
-// };
-
-
-
 export const uploadLargeFile = (req, res) => {
   try {
     const bb = busboy({ headers: req.headers });
@@ -292,3 +237,50 @@ export const getProjectFiles = async (req, res) => {
 };
 
 
+export const getProjectDataByName = async (req, res) => {
+  const projectName = req.params.projectName || req.query.projectName;
+
+  if (!projectName) {
+    return res.status(400).json({
+      status: "error",
+      message: "projectName parameter is required",
+    });
+  }
+
+  try {
+    const params = {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Prefix: `uploads/projects/${projectName}/`,
+    };
+
+    const data = await s3.listObjectsV2(params).promise(); // use imported s3
+
+    if (!data.Contents || data.Contents.length === 0) {
+      return res.status(404).json({
+        status: "error",
+        message: `No files found for project: ${projectName}`,
+      });
+    }
+
+    const files = data.Contents.map(file => ({
+      key: file.Key,
+      url: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${file.Key}`,
+      lastModified: file.LastModified,
+      size: file.Size,
+    }));
+
+    return res.json({
+      status: "success",
+      project: projectName,
+      count: files.length,
+      files,
+    });
+  } catch (err) {
+    console.error("S3 LIST ERROR:", err);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to fetch project files",
+      error: err.message,
+    });
+  }
+};

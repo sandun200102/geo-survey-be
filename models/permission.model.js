@@ -6,6 +6,10 @@ const permissionSchema = new mongoose.Schema({
         required: true,
         
     },
+    userName: {
+        type: String,
+        required: true,
+    },
 
     permissionId: {
         type: String,
@@ -21,6 +25,11 @@ const permissionSchema = new mongoose.Schema({
     
     projectId: {
         type: String
+    },
+
+    projectName: {
+        type: String,
+        default: null,
     },
     
     permissionStatus: {

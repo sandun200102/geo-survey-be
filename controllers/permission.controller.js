@@ -4,10 +4,10 @@ import { Permission } from "../models/permission.model.js";
 
 
 export const createPermission = async (req, res) => {
-    const { userId, permissionId, userEmail, projectId, permissionStatus} = req.body;
+    const { userId, userName, permissionId, userEmail, projectId,projectName, permissionStatus} = req.body;
     try {
         // Validate the request body
-        if (!permissionStatus || !userEmail || !projectId || !permissionId || !userId) {
+        if (!permissionStatus || !userEmail || !projectId || !permissionId || !userId || !userName || !projectName ) {
             return res.status(400).json({ message: 'All fields are required' });
         }
         // Check if the equipment already exists
@@ -19,9 +19,11 @@ export const createPermission = async (req, res) => {
         // Create a new equipment
         const permission = new Permission({
             userId,
+            userName,
             permissionId,
             userEmail,
             projectId,
+            projectName,
             permissionStatus
         });
         await permission.save();        
@@ -72,3 +74,73 @@ export const getAllPermission = async (req, res) => {
     res.status(500).json({ message: "Error fetching permission" });
   }
 };
+
+// Get permission status by MongoDB document ID
+export const getPermissionStatus = async (req, res) => {
+  const userId = req.params.id; // this is the userId from URL
+
+  try {
+    // Find by userId field, not by MongoDB _id
+    const permission = await Permission.findOne({ userId });
+
+    if (!permission) {
+      return res.status(404).json({ message: "Permission not found" });
+    }
+
+    res.status(200).json({
+      permissionStatus: permission.permissionStatus,
+      
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching permission status" });
+  }
+};
+
+
+export const getPermissionProjectName= async (req, res) => {
+  const userId = req.params.id; // this is the userId from URL
+
+  try {
+    // Find by userId field, not by MongoDB _id
+    const permission = await Permission.findOne({ userId });
+
+    if (!permission) {
+      return res.status(404).json({ message: "Permission not found" });
+    }
+
+    res.status(200).json({
+      projectName: permission.projectName,
+      
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching permission status" });
+  }
+};
+
+export const getPermissionUserId= async (req, res) => {
+  const userId = req.params.id; // this is the userId from URL
+
+  try {
+    // Find by userId field, not by MongoDB _id
+    const permission = await Permission.findOne({ userId });
+
+    if (!permission) {
+      return res.status(404).json({ message: "Permission not found" });
+    }
+
+    res.status(200).json({
+      userId: permission.userId,
+      
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching permission status" });
+  }
+};
+
+

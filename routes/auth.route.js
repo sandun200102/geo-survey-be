@@ -5,11 +5,11 @@ import { verifyToken } from '../middleware/verifyToken.js';
 import { uploadNewEquipment, updateEquipment , getAllEquipment, getEquipmentById, deleteEquipment, updateImageKey } from '../controllers/equip.controller.js';
 import { createBooking, getAllBookings, updateBookingStatus, getBookingById, getBookingsByUserId, sendBookingEmail, updatePermission, sendPermissionEmail, sendPermissionEmailToUser, sendBookingConfirmedEmail, updateUserBookingStatus} from "../controllers/booking.controller.js";
 import {  isAdmin } from '../middleware/verifyAdmin.js';
-import { upload, uploadFiles, getImage, uploadLargeFile, getAllProjects, getProjectFiles } from "../controllers/s3.controller.js";
+import { upload, uploadFiles, getImage, uploadLargeFile, getAllProjects, getProjectDataByName, getProjectFiles } from "../controllers/s3.controller.js";
 import { UploadImageWebsite } from "../controllers/image.controller.js";
 import { AddNewLmsUser, addCourseToUser, getLmsUserByUserID} from "../controllers/lmsUser.controller.js";
-import { createPermission, getAllPermission, updatePermissionProj } from '../controllers/permission.controller.js';
-import { UploadProject, updateProject, getAllProject, removeProject } from '../controllers/project.controller.js';
+import { createPermission, getAllPermission, updatePermissionProj,getPermissionStatus, getPermissionProjectName, getPermissionUserId } from '../controllers/permission.controller.js';
+import { UploadProject, updateProject, getAllProject, removeProject, getProjectById } from '../controllers/project.controller.js';
 
 
 const router = Router();
@@ -41,6 +41,7 @@ router.patch("/update-role/:id", updateRole);
 router.post("/upload", upload.array("file"), uploadFiles);
 router.get("/get-image/:key",getImage);
 router.get("/projects",getAllProjects);
+router.get("/projects/:projectName", getProjectDataByName);
 router.get("/projects/:projectName/files", getProjectFiles);
 
 
@@ -55,18 +56,23 @@ router.delete('/delete-equipment/:id', deleteEquipment);
 router.get('/get-permission', getAllPermission);
 router.post('/create-permission', createPermission);
 router.put('/update-permission-proj/:id', updatePermissionProj);
+router.get('/get-project-permission/:id', getPermissionStatus);
+router.get('/get-permission-project-name/:id', getPermissionProjectName);
+router.get('/get-permission-user-id/:id', getPermissionUserId);
 
 
 router.get('/get-project', getAllProject);
 router.post('/upload-project', UploadProject);
 router.put('/update-project/:id', updateProject);
 router.delete('/remove-project/:id', removeProject);
+router.get('/get-project-by-id/:id', getProjectById);
+
 
 
 router.post('/create-booking', createBooking);
 router.get('/get-all-bookings', getAllBookings);
 router.get('/get-booking-id', getBookingById);
-router.get('/get-booking-userid', getBookingsByUserId);
+router.get('/get-booking-user/:id', getBookingsByUserId);
 router.put('/update-booking-status/:id', updateBookingStatus);
 router.patch('/update-user-booking-status/:id', updateUserBookingStatus);
 
