@@ -210,7 +210,7 @@ export const getBookingsByUserId = async (req, res) => {
 
 
 export const sendBookingEmail = async (req, res) => {
-    console.log("giyaaaaa");
+    console.log("Request sent");
     const { 
           name, 
           email ,

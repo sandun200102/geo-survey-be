@@ -53,21 +53,33 @@ export const uploadFiles = async (req, res) => {
   }
 };
 
-export const getImage =  (req, res) => {
+export const getImage = async (req, res) => {
   const key = req.params.key;
   const Bucket = process.env.AWS_BUCKET_NAME;
-  const region = process.env.AWS_REGION;
 
-  const imageUrl = `https://${Bucket}.s3.${region}.amazonaws.com/${key}`;
+  if (!key) {
+    return res.status(400).json({ message: "Image key is required" });
+  }
 
-  s3.headObject({ Bucket, Key: key }, (err) => {
-    if (err && err.code === "NotFound") {
+  try {
+    // Verify the object exists
+    await s3.headObject({ Bucket, Key: key }).promise();
+
+    // Return a signed URL so the client can access the object (handles special chars)
+    const signedUrl = s3.getSignedUrl("getObject", {
+      Bucket,
+      Key: key,
+      Expires: 60 * 60, // 1 hour
+    });
+
+    return res.json({ url: signedUrl });
+  } catch (err) {
+    console.error("GET IMAGE ERROR:", err);
+    if (err.code === "NotFound" || err.statusCode === 404) {
       return res.status(404).json({ message: "Image not found" });
-    } else if (err) {
-      return res.status(500).json({ message: "Error checking image", error: err.message });
     }
-    return res.json({ url: imageUrl });
-  });
+    return res.status(500).json({ message: "Error checking image", error: err.message });
+  }
 };
 
 
